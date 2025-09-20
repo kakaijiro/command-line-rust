@@ -18,6 +18,16 @@ This repository contains a collection of command-line tools built with Rust.
 - **Dependencies**:
   - `clap` - command-line argument parsing
 
+### catr
+- **Description**: Cat command implementation with line numbering features
+- **Version**: 0.1.0
+- **Edition**: 2024
+- **Dependencies**:
+  - `clap` - command-line argument parsing
+  - `assert_cmd` (dev-dependencies) - for testing
+  - `predicates` (dev-dependencies) - for testing assertions
+  - `rand` (dev-dependencies) - for test data generation
+
 ## Setup
 
 Each project is an independent Rust project. You can build and run them with the following commands:
@@ -29,6 +39,10 @@ cargo run
 
 # echor project
 cd echor
+cargo run
+
+# catr project
+cd catr
 cargo run
 ```
 
@@ -44,6 +58,10 @@ cargo test
 # echor project tests
 cd echor
 cargo test
+
+# catr project tests
+cd catr
+cargo test
 ```
 
 ## Project Structure
@@ -57,6 +75,11 @@ command-line-rust/
 │   └── .gitignore
 ├── echor/           # Echo command project
 │   ├── src/
+│   ├── Cargo.toml
+│   └── .gitignore
+├── catr/            # Cat command project
+│   ├── src/
+│   ├── tests/
 │   ├── Cargo.toml
 │   └── .gitignore
 ├── .gitignore       # Global .gitignore
