@@ -3,7 +3,7 @@ use clap::{Command, Arg, ArgAction};  // Command is the equivalent of App in cla
 fn main() {
     let matches = Command::new("echor")
     .version("0.1.0")
-    .author("Jirok <kakaijirok@gmail.com>")
+    .author("Jirok, kakaijirok@gmail.com")
     .about("Rust echo")
     .arg(
         Arg::new("text")
@@ -20,22 +20,15 @@ fn main() {
     )
     .get_matches();
 
-    println!("{:#?}", matches)
+    // get values from arguments
+    let text: Vec<&str> = matches
+        .get_many::<String>("text")
+        .unwrap_or_default()
+        .map(|s| s.as_str())
+        .collect();
 
-    // // get values from arguments
-    // let text_values: Vec<&String> = matches.get_many::<String>("text")
-    //     .unwrap_or_default()
-    //     .collect();
-    
-    // // if -n option is specified
-    // let omit_newline = matches.get_flag("omit_newline");
-    
-    // // join text values
-    // let output = text_values.join(" ");
-    
-    // if omit_newline {
-    //     print!("{}", output);
-    // } else {
-    //     println!("{}", output);
-    // }
+    // get flag from arguments
+    let omit_newline = matches.get_flag("omit_newline");
+
+    print!("{}{}", text.join(" "), if omit_newline {""} else {"\n"});
 }
