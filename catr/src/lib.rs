@@ -1,8 +1,12 @@
 use std::error::Error;
 use clap::{Arg, Command, ArgAction};
+use std::fs::File;
+use std::io::{self, BufRead, BufReader};
 
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
+#[deny(unused_variables)]
+#[allow(dead_code)]
 pub struct Config {
     files: Vec<String>,
     number_lines: bool,
@@ -12,8 +16,53 @@ pub struct Config {
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
 
+fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
+    match filename {
+        "-" => Ok(Box::new(BufReader::new(io::stdin()))),
+        _ => Ok(Box::new(BufReader::new(File::open(filename)?))),
+    }
+}
+
 pub fn run(config: Config) -> MyResult<()> {
-    dbg!(config);
+    for filename in &config.files {
+        match open(filename) {
+            Err(e) => eprintln!("Failed to open {filename}: {e}"),
+            Ok(mut reader) => {
+                let mut line = String::new();
+                let mut line_num = 1;
+                
+                loop {
+                    let bytes_read = reader.read_line(&mut line)?;
+                    if bytes_read == 0 {
+                        print!("{}", "\n");
+                        break; // reached EOF
+                    }
+                    
+                    // -n option: number all lines
+                    if config.number_lines {
+                        print!("{:1}\t{}", line_num, line);
+                        line_num += 1;
+                    }
+                    // -b option: number nonblank lines
+                    else if config.number_nonblank_lines {
+                        if line.trim().is_empty() {
+                            print!("{}", line); // blank line has no line number
+                        } else {
+                            print!("{:1}\t{}", line_num, line);
+                            line_num += 1;
+                        }
+                    }
+                    // no option: display lines without line numbers
+                    else {
+                        print!("{}", line);
+                    }
+                    
+                    line.clear(); // clear for next line
+                }
+            }
+        }
+    }
+    // dbg!(config);
     Ok(())
 }
 
@@ -26,8 +75,8 @@ pub fn get_args() -> MyResult<Config> {
             Arg::new("files")
             .value_name("FILE")
             .help("Input file(s)")
-            .required(true)
-            .num_args(1..),
+            .num_args(1..)
+            .default_value("-"),
         )
         .arg(
             Arg::new("number_lines")
@@ -44,7 +93,11 @@ pub fn get_args() -> MyResult<Config> {
         .get_matches();
 
     Ok(Config {
-        files: matches.get_many::<String>("files").unwrap_or_default().map(|s| s.to_string()).collect(),
+        files: matches
+            .get_many::<String>("files")
+            .unwrap_or_default()
+            .map(|s| s.to_string())
+            .collect(),
         number_lines: matches.get_flag("number_lines"),
         number_nonblank_lines: matches.get_flag("number_nonblank_lines"),
     })
