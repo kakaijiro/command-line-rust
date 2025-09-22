@@ -34,13 +34,12 @@ pub fn run(config: Config) -> MyResult<()> {
                 loop {
                     let bytes_read = reader.read_line(&mut line)?;
                     if bytes_read == 0 {
-                        print!("{}", "\n");
                         break; // reached EOF
                     }
                     
                     // -n option: number all lines
                     if config.number_lines {
-                        print!("{:1}\t{}", line_num, line);
+                        print!("{:>6}\t{}", line_num, line);
                         line_num += 1;
                     }
                     // -b option: number nonblank lines
@@ -48,7 +47,7 @@ pub fn run(config: Config) -> MyResult<()> {
                         if line.trim().is_empty() {
                             print!("{}", line); // blank line has no line number
                         } else {
-                            print!("{:1}\t{}", line_num, line);
+                            print!("{:>6}\t{}", line_num, line);
                             line_num += 1;
                         }
                     }
@@ -75,7 +74,7 @@ pub fn get_args() -> MyResult<Config> {
             Arg::new("files")
             .value_name("FILE")
             .help("Input file(s)")
-            .num_args(1..)
+            .num_args(0..)
             .default_value("-"),
         )
         .arg(
