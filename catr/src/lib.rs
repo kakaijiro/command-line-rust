@@ -24,12 +24,12 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let mut line_num = 1;
     for filename in &config.files {
         match open(filename) {
             Err(e) => eprintln!("Failed to open {filename}: {e}"),
             Ok(mut reader) => {
                 let mut line = String::new();
-                let mut line_num = 1;
                 
                 loop {
                     let bytes_read = reader.read_line(&mut line)?;
