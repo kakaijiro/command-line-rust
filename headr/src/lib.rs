@@ -1,6 +1,6 @@
 use clap::{Arg, Command, ArgAction};
 use std::fs::File;
-use std::io::{self, BufRead, BufReader};
+use std::io::{self, BufRead, BufReader, Read};
 use std::error::Error;
 
 type MyResult<T> = Result<T, Box<dyn Error>>;
@@ -73,7 +73,29 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 pub fn run(config: Config)-> MyResult<()> {
-    println!("{:#?}", config);
+    for file in &config.files {
+        match open(file) {
+            Err(e) => eprint!("{}: {}", file, e),
+            Ok(mut file) => {
+                if let Some(num_bytes) = config.bytes {
+                    let mut handle = file.take(num_bytes as u64);
+                    let mut buffer = vec![0; num_bytes];
+                    let bytes_read = handle.read(&mut buffer)?;
+                    print!("{}", String::from_utf8_lossy(&buffer[..bytes_read]));
+                } else {
+                    let mut line = String::new();
+                    for _ in 0..config.lines {
+                        let bytes_read = file.read_line(&mut line)?;
+                        if bytes_read == 0 {
+                            break;
+                        }
+                        print!("{}", line);
+                        line.clear();
+                    }
+                }
+            },
+        }
+    }
     Ok(())
 }
 
