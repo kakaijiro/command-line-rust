@@ -73,10 +73,15 @@ fn open(filename: &str) -> MyResult<Box<dyn BufRead>> {
 }
 
 pub fn run(config: Config)-> MyResult<()> {
-    for file in &config.files {
-        match open(file) {
-            Err(e) => eprint!("{}: {}", file, e),
+    let num_files =config.files.len();
+    
+    for (file_num, filename) in config.files.iter().enumerate() {
+        match open(filename) {
+            Err(e) => eprint!("{}: {}", filename, e),
             Ok(mut file) => {
+                if num_files > 1 {
+                    println!("{}==> {} <==", if file_num > 0 {"\n"} else {""}, filename);
+                }
                 if let Some(num_bytes) = config.bytes {
                     let mut handle = file.take(num_bytes as u64);
                     let mut buffer = vec![0; num_bytes];
