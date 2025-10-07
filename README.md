@@ -28,6 +28,16 @@ This repository contains a collection of command-line tools built with Rust.
   - `predicates` (dev-dependencies) - for testing assertions
   - `rand` (dev-dependencies) - for test data generation
 
+### headr
+- **Description**: Head command implementation for displaying the first lines/bytes of files
+- **Version**: 0.1.0
+- **Edition**: 2024
+- **Dependencies**:
+  - `clap` - command-line argument parsing
+  - `assert_cmd` (dev-dependencies) - for testing
+  - `predicates` (dev-dependencies) - for testing assertions
+  - `rand` (dev-dependencies) - for test data generation
+
 ## Setup
 
 Each project is an independent Rust project. You can build and run them with the following commands:
@@ -43,6 +53,10 @@ cargo run
 
 # catr project
 cd catr
+cargo run
+
+# headr project
+cd headr
 cargo run
 ```
 
@@ -62,6 +76,10 @@ cargo test
 # catr project tests
 cd catr
 cargo test
+
+# headr project tests
+cd headr
+cargo test
 ```
 
 ## Project Structure
@@ -78,6 +96,11 @@ command-line-rust/
 │   ├── Cargo.toml
 │   └── .gitignore
 ├── catr/            # Cat command project
+│   ├── src/
+│   ├── tests/
+│   ├── Cargo.toml
+│   └── .gitignore
+├── headr/           # Head command project
 │   ├── src/
 │   ├── tests/
 │   ├── Cargo.toml
