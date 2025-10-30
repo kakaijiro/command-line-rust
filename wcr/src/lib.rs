@@ -53,14 +53,16 @@ pub fn get_args() -> MyResult<Config> {
             .short('c')
             .long("bytes")
             .help("Show byte count")
-            .action(ArgAction::SetTrue),
+            .action(ArgAction::SetTrue)
+            .conflicts_with("chars"),
         )
         .arg(
             Arg::new("chars")
             .short('m')
             .long("chars")
             .help("Show char count")
-            .action(ArgAction::SetTrue),
+            .action(ArgAction::SetTrue)
+            .conflicts_with("bytes"),
         )
         .get_matches();
     
@@ -127,7 +129,10 @@ pub fn run(config: Config) -> MyResult<()> {
     for filename in &config.files {
         match open(filename) {
             Err(e) => eprintln!("{}: {}", filename, e),
-            Ok(_) => println!("Opened {}", filename),
+            Ok(file) => {
+                let info = count(file)?;
+                println!("{:>8}{:>8}{:>8}{:>8} {}", info.num_lines, info.num_words, info.num_bytes, info.num_chars, filename);
+            }
         }
     }
     Ok(())
