@@ -3,7 +3,7 @@ use std::fs::File;
 use std::io::{self, BufRead, BufReader};
 use std::error::Error;
 
-type MyResult<T> = Result<T, Box<dyn Error>>;
+pub type MyResult<T> = Result<T, Box<dyn Error>>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Config {
@@ -126,22 +126,56 @@ pub fn count(mut file: impl BufRead) -> MyResult<FileInfo> {
 }
 
 pub fn run(config: Config) -> MyResult<()> {
+    let mut total_lines = 0;
+    let mut total_words = 0;
+    let mut total_bytes = 0;
+    let mut total_chars = 0;
     for filename in &config.files {
         match open(filename) {
             Err(e) => eprintln!("{}: {}", filename, e),
             Ok(file) => {
                 let info = count(file)?;
-                println!("{:>8}{:>8}{:>8}{:>8} {}", info.num_lines, info.num_words, info.num_bytes, info.num_chars, filename);
+                println!("{}{}{}{}{}", 
+                    format_field(info.num_lines, config.lines), 
+                    format_field(info.num_words, config.words), 
+                    format_field(info.num_bytes, config.bytes), 
+                    format_field(info.num_chars, config.chars), 
+                    if filename == "-" { "".to_string() } 
+                    else { format!(" {}", filename) }
+                );
+
+                total_lines += info.num_lines;
+                total_words += info.num_words;
+                total_bytes += info.num_bytes;
+                total_chars += info.num_chars;
             }
         }
     }
+    if config.files.len() > 1 {
+        println!("{}{}{}{}{}", 
+            format_field(total_lines, config.lines), 
+            format_field(total_words, config.words), 
+            format_field(total_bytes, config.bytes), 
+            format_field(total_chars, config.chars), 
+            " total".to_string()
+        );
+    }
     Ok(())
+}
+
+// -------------------- helper functions --------------------
+fn format_field(value: usize, show: bool) -> String {
+    if show {
+        format!("{value:>8}")
+    } else {
+        "".to_string()
+    }
 }
 
 // -------------------- tests --------------------
 #[cfg(test)]
 mod tests {
-    use super::{count, FileInfo};
+    use super::{count, FileInfo, format_field};
     use std::io::Cursor;
 
     #[test]
@@ -158,5 +192,12 @@ mod tests {
             num_chars: 48,
         };
         assert_eq!(info.unwrap(), expected);
+    }
+
+    #[test]
+    fn test_format_field() {
+        assert_eq!(format_field(1, false), "");
+        assert_eq!(format_field(3, true), "       3");
+        assert_eq!(format_field(10, true), "      10");
     }
 }
